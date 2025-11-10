@@ -1,0 +1,13 @@
+project_id = "dikifwudqhstaadzpgss"
+
+[functions.qr-redirect]
+verify_jwt = false
+
+[functions.qr-expiry-cron]
+verify_jwt = false
+
+[functions.create-payment-order]
+verify_jwt = true
+
+[functions.razorpay-webhook]
+verify_jwt = false

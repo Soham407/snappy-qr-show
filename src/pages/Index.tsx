@@ -1,172 +1,145 @@
-import { useState, useEffect } from "react";
+import { Sparkles, Palette, BarChart3, Zap, Shield, Download } from "lucide-react";
+import QRGenerator from "@/components/QRGenerator";
+import FeatureCard from "@/components/FeatureCard";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Download, Zap, Shield, Smartphone, QrCode } from "lucide-react";
-import { toast } from "sonner";
-import QRCode from "qrcode";
+import { Link } from "react-router-dom";
+import heroBg from "@/assets/hero-bg.jpg";
+import Header from "@/components/Header";
 
 const Index = () => {
-  const [inputValue, setInputValue] = useState("");
-  const [qrCodeUrl, setQrCodeUrl] = useState("");
-
-  useEffect(() => {
-    // Generate initial QR code
-    generateQRCode("https://lovable.dev");
-  }, []);
-
-  const generateQRCode = async (text: string) => {
-    if (!text.trim()) {
-      toast.error("Please enter some text or URL");
-      return;
-    }
-
-    try {
-      const url = await QRCode.toDataURL(text, {
-        width: 300,
-        margin: 2,
-        color: {
-          dark: "#0891b2",
-          light: "#ffffff",
-        },
-      });
-      setQrCodeUrl(url);
-      toast.success("QR code generated!");
-    } catch (error) {
-      toast.error("Failed to generate QR code");
-      console.error(error);
-    }
-  };
-
-  const handleGenerate = () => {
-    generateQRCode(inputValue);
-  };
-
-  const handleDownload = () => {
-    if (!qrCodeUrl) return;
-
-    const link = document.createElement("a");
-    link.href = qrCodeUrl;
-    link.download = "qrcode.png";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success("QR code downloaded!");
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-primary/5">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <Header />
+
       {/* Hero Section */}
-      <section className="container mx-auto px-4 pt-20 pb-16 text-center">
-        <div className="animate-fade-in">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent mb-6">
-            <QrCode className="w-8 h-8 text-primary-foreground" />
+      <section className="relative overflow-hidden py-20 lg:py-28">
+        <div 
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `url(${heroBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-12 space-y-6 animate-in fade-in duration-700">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+              <Sparkles className="w-4 h-4" />
+              <span>Beautiful QR Codes in Seconds</span>
+            </div>
+            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight">
+              Create, Design & Track
+              <br />
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Professional QR Codes
+              </span>
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              From personal projects to marketing campaigns. Quick QR makes it effortless 
+              to create stunning, trackable QR codes that drive results.
+            </p>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-            QR Code Generator
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
-            Create custom QR codes instantly. Free, fast, and simple to use.
-            Perfect for sharing links, text, and more.
-          </p>
+
+          {/* QR Generator */}
+          <div className="animate-in slide-in-from-bottom duration-700 delay-200">
+            <QRGenerator />
+          </div>
         </div>
-
-        {/* Generator Card */}
-        <Card className="max-w-4xl mx-auto p-8 shadow-[var(--shadow-elevated)] animate-scale-in">
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Input Section */}
-            <div className="space-y-4">
-              <div className="text-left">
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  Enter Text or URL
-                </label>
-                <Input
-                  placeholder="https://example.com"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleGenerate()}
-                  className="h-12 text-base"
-                />
-              </div>
-              <Button
-                onClick={handleGenerate}
-                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
-                size="lg"
-              >
-                Generate QR Code
-              </Button>
-            </div>
-
-            {/* QR Code Display */}
-            <div className="flex flex-col items-center justify-center space-y-4">
-              {qrCodeUrl ? (
-                <>
-                  <div className="bg-white p-4 rounded-xl shadow-lg">
-                    <img
-                      src={qrCodeUrl}
-                      alt="Generated QR Code"
-                      className="w-64 h-64"
-                    />
-                  </div>
-                  <Button
-                    onClick={handleDownload}
-                    variant="outline"
-                    className="gap-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download QR Code
-                  </Button>
-                </>
-              ) : (
-                <div className="w-64 h-64 border-2 border-dashed border-border rounded-xl flex items-center justify-center">
-                  <p className="text-muted-foreground">
-                    Your QR code will appear here
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </Card>
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <Card className="p-6 text-center hover:shadow-[var(--shadow-elevated)] transition-shadow">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-4">
-              <Zap className="w-6 h-6 text-primary" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Instant Generation</h3>
-            <p className="text-muted-foreground">
-              Create QR codes in seconds with our lightning-fast generator
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12 space-y-4">
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground">
+              Everything You Need
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Powerful features to create, customize, and track your QR codes
             </p>
-          </Card>
+          </div>
 
-          <Card className="p-6 text-center hover:shadow-[var(--shadow-elevated)] transition-shadow">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-accent/10 mb-4">
-              <Shield className="w-6 h-6 text-accent" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Secure & Private</h3>
-            <p className="text-muted-foreground">
-              All QR codes are generated locally in your browser
-            </p>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <FeatureCard
+              icon={Zap}
+              title="Instant Generation"
+              description="Create beautiful QR codes in seconds with our instant generator. No waiting, no complexity."
+            />
+            <FeatureCard
+              icon={Palette}
+              title="Custom Design"
+              description="Add frames, logos, and custom colors to make your QR codes match your brand perfectly."
+            />
+            <FeatureCard
+              icon={BarChart3}
+              title="Scan Analytics"
+              description="Track every scan with detailed analytics. Know when, where, and how your QR codes are performing."
+            />
+            <FeatureCard
+              icon={Download}
+              title="Dynamic QR Codes"
+              description="Change the destination URL anytime without reprinting. Perfect for marketing campaigns."
+            />
+            <FeatureCard
+              icon={Shield}
+              title="Secure & Private"
+              description="Your data is encrypted and secure. We're committed to GDPR compliance and user privacy."
+            />
+            <FeatureCard
+              icon={Sparkles}
+              title="Free Forever"
+              description="Start with 20 free static QR codes and 1 trial dynamic code. Upgrade only when you need more."
+            />
+          </div>
+        </div>
+      </section>
 
-          <Card className="p-6 text-center hover:shadow-[var(--shadow-elevated)] transition-shadow">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-4">
-              <Smartphone className="w-6 h-6 text-primary" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Universal Compatibility</h3>
-            <p className="text-muted-foreground">
-              Works perfectly on all devices and QR code scanners
+      {/* CTA Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl p-12 text-center space-y-6 border border-primary/20">
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground">
+              Ready to Get Started?
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Join thousands of users creating professional QR codes for their business and personal projects.
             </p>
-          </Card>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/signin">
+                <Button variant="hero" size="xl">
+                  Create Your First QR Code
+                </Button>
+              </Link>
+              <Link to="/pricing">
+                <Button variant="outline" size="xl">
+                  View Pricing
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="container mx-auto px-4 py-8 text-center text-muted-foreground border-t">
-        <p>Built with Lovable • Free QR Code Generator</p>
+      <footer className="border-t border-border/50 py-8 bg-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-semibold text-foreground">Quick QR</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              © 2025 Quick QR. All rights reserved.
+            </p>
+            <div className="flex gap-6 text-sm text-muted-foreground">
+              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+              <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+              <Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );
