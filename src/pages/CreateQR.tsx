@@ -208,7 +208,7 @@ const CreateQR = () => {
           type: qrType,
           short_url: shortUrl,
           destination_url: destinationUrl,
-          status: 'active',
+          status: qrType === 'dynamic' ? 'trial' : 'active',
           expires_at: expiresAt,
         })
         .select()
