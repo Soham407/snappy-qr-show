@@ -1,10 +1,81 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { initiatePayment } from "@/lib/payment-utils";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Pricing = () => {
+  const navigate = useNavigate();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [qrCodes, setQrCodes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleUpgradeClick = async () => {
+    setLoading(true);
+    
+    // Check if user is logged in
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      toast.error("Please sign in to upgrade");
+      navigate("/signin");
+      setLoading(false);
+      return;
+    }
+
+    // Fetch user's dynamic QR codes that are not active
+    const { data: codes, error } = await supabase
+      .from("qr_codes")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .eq("type", "dynamic")
+      .neq("status", "active")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching QR codes:", error);
+      toast.error("Failed to load your QR codes");
+      setLoading(false);
+      return;
+    }
+
+    if (!codes || codes.length === 0) {
+      toast.info("You don't have any trial QR codes to upgrade");
+      navigate("/create");
+      setLoading(false);
+      return;
+    }
+
+    setQrCodes(codes);
+    setDialogOpen(true);
+    setLoading(false);
+  };
+
+  const handlePayment = async (qrCode: any) => {
+    setDialogOpen(false);
+    await initiatePayment({
+      qrCodeId: qrCode.id,
+      qrCodeName: qrCode.name,
+      onSuccess: () => {
+        toast.success("QR code upgraded successfully!");
+        navigate("/dashboard");
+      },
+      onFailure: (error) => {
+        console.error("Payment failed:", error);
+      },
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -98,16 +169,55 @@ const Pricing = () => {
                     <span>Priority email support</span>
                   </li>
                 </ul>
-                <Link to="/dashboard">
-                  <Button variant="hero" size="lg" className="w-full">
-                    Manage Pro Features
-                  </Button>
-                </Link>
+                <Button 
+                  variant="hero" 
+                  size="lg" 
+                  className="w-full"
+                  onClick={handleUpgradeClick}
+                  disabled={loading}
+                >
+                  {loading ? "Loading..." : "Upgrade to Pro"}
+                </Button>
               </div>
             </Card>
           </div>
         </div>
       </section>
+
+      {/* QR Code Selection Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Select QR Code to Upgrade</DialogTitle>
+            <DialogDescription>
+              Choose which dynamic QR code you'd like to upgrade to Pro
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 mt-4">
+            {qrCodes.map((qr) => (
+              <Card key={qr.id} className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">{qr.name}</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {qr.destination_url.length > 40 
+                        ? qr.destination_url.substring(0, 40) + "..." 
+                        : qr.destination_url}
+                    </p>
+                  </div>
+                  <Button 
+                    variant="hero" 
+                    size="sm"
+                    onClick={() => handlePayment(qr)}
+                  >
+                    Upgrade
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
