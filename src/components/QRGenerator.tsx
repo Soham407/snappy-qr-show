@@ -2,9 +2,9 @@ import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Sparkles, Lock } from "lucide-react";
+import { Sparkles, Download } from "lucide-react";
 import QRCodeStyling from "qr-code-styling";
-import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface QRGeneratorProps {
   onGenerate?: (url: string) => void;
@@ -15,7 +15,6 @@ const QRGenerator = ({ onGenerate }: QRGeneratorProps) => {
   const [qrGenerated, setQrGenerated] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   const qrCode = useRef<QRCodeStyling | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (qrGenerated && qrRef.current && url) {
@@ -55,6 +54,17 @@ const QRGenerator = ({ onGenerate }: QRGeneratorProps) => {
     if (url.trim()) {
       setQrGenerated(true);
       onGenerate?.(url);
+      toast.success("QR code generated!");
+    }
+  };
+
+  const handleDownload = () => {
+    if (qrCode.current) {
+      qrCode.current.download({
+        name: "qr-code",
+        extension: "png",
+      });
+      toast.success("QR code downloaded!");
     }
   };
 
@@ -90,26 +100,18 @@ const QRGenerator = ({ onGenerate }: QRGeneratorProps) => {
 
           {qrGenerated && (
             <div className="mt-6 flex flex-col items-center space-y-4 animate-in fade-in duration-500">
-              <div className="relative">
-                {/* The blurred QR code */}
-                <div 
-                  ref={qrRef} 
-                  className="rounded-xl overflow-hidden border-4 border-primary/20 blur-sm w-[280px] h-[280px]"
-                />
-                
-                {/* Overlay with lock and CTA */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl">
-                  <Lock className="w-12 h-12 text-primary mb-3" />
-                  <p className="text-lg font-semibold text-foreground mb-2">Your QR Code is Ready!</p>
-                  <p className="text-sm text-muted-foreground mb-4">Sign up to unlock and download</p>
-                  <Button variant="hero" size="lg" onClick={() => navigate('/signup')}>
-                    Sign Up to Unlock
-                  </Button>
-                </div>
-              </div>
+              <div 
+                ref={qrRef} 
+                className="p-4 bg-white rounded-xl border-4 border-primary/20"
+              />
+              
+              <Button variant="hero" size="lg" onClick={handleDownload}>
+                <Download className="w-4 h-4" />
+                Download QR Code
+              </Button>
 
               <p className="text-xs text-muted-foreground text-center max-w-md">
-                Create a free account to download this QR code and unlock powerful features like dynamic QR codes, custom designs, and analytics.
+                Your QR code is ready! Click download to save it to your device.
               </p>
             </div>
           )}
