@@ -374,17 +374,9 @@ const Dashboard = () => {
                     if (e.key === "Enter" || e.key === " ") setSelectedQr(qr);
                   }}
                 >
-                  {qr.qr_design && (
-                    <div className="w-12 h-12 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center bg-white">
-                      <QRCodePreview
-                        type={qr.type}
-                        data={qr.type === "dynamic" ? qr.short_url! : qr.destination_url}
-                        design={qr.qr_design}
-                        width={48}
-                        height={48}
-                      />
-                    </div>
-                  )}
+                  <div className="w-12 h-12 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center bg-muted">
+                    <QrCode className="w-8 h-8 text-muted-foreground" />
+                  </div>
                   <div className="flex flex-col">
                     <span className="font-medium hover:text-primary">{qr.name}</span>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
